@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Copilote SNCF IA</title>
+
+<link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+
+<style>
+.incident-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.incident-table th {
+    text-align: left;
+    padding: 10px;
+    background: rgba(255,255,255,0.1);
+}
+
+.incident-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.incident-table tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.critique { color: red; font-weight: bold; }
+.elevee { color: orange; }
+.moyenne { color: yellow; }
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #020617, #0f172a);
+    color: white;
+}
+
+header {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+header h1 {
+    font-size: 40px;
+    background: linear-gradient(90deg, #38bdf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.intro-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 20px;
+    align-items: center;
+}
+
+.intro {
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(15,23,42,0.6);
+}
+
+.hakim {
+    position: relative;
+    cursor: pointer;
+}
+
+.hakim img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    object-position: center top;
+}
+
+.hakim-overlay {
+    position: absolute;
+    bottom: 0;
+    padding: 20px;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    padding: 20px;
+}
+
+.card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-8px) scale(1.03);
+}
+
+.card-img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+}
+
+.card-content {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+}
+
+#chat-container {
+    margin: 25px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🚆 Copilote SNCF Réseau</h1>
+    <p>Assistant intelligent multi-agents</p>
+</header>
+
+<div class="intro-container">
+
+    <div class="intro">
+        <h2>🧠 Plateforme IA SNCF</h2>
+        <p>Analyse intelligente du réseau ferroviaire grâce à des agents métiers.</p>
+    </div>
+
+    <div class="hakim" onclick="sendQuick('analyse globale du réseau SNCF')">
+        <img src="images/hakim.png">
+        <div class="hakim-overlay">
+            <h2>Hakim</h2>
+            <p>Orchestrateur IA</p>
+        </div>
+    </div>
+
+</div>
+
+<div class="container">
+
+    <div class="card" onclick="sendQuick('@fanny pourquoi il y a des retards ?')">
+        <img src="images/fanny.png" class="card-img">
+        <div class="card-content">
+            <h2>Fanny</h2>
+        </div>
+    </div>
+
+    <div class="card" onclick="sendQuick('@lucas quelles gares sont saturées ?')">
+        <img src="images/lucas.png" class="card-img">
+        <div class="card-content">
+            <h2>Lucas</h2>
+        </div>
+    </div>
+
+</div>
+
+<!-- TABLEAU INCIDENTS -->
+<div class="panel">
+    <h2>🚨 Incidents</h2>
+
+    <table class="incident-table">
+        <thead>
+            <tr>
+                <th>Ligne</th>
+                <th>Retard</th>
+                <th>Gravité</th>
+                <th>Cause</th>
+                <th>Solution</th>
+                <th>Recommandation</th>
+            </tr>
+        </thead>
+        <tbody id="incidentTableBody"></tbody>
+    </table>
+</div>
+
+<div id="chat-container"></div>
+
+<script type="module">
+import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+const chat = createChat({
+    webhookUrl: 'https://intelligenceai.app.n8n.cloud/webhook/77d3ff55-1dc6-470c-96dd-153370df3a47/chat',
+    target: '#chat-container',
+    mode: 'embedded'
+});
+
+window.n8nChat = chat;
+
+window.sendQuick = (msg) => {
+    window.n8nChat.sendMessage(msg);
+};
+</script>
+
+<script>
+
+
+// 🔥 charger depuis n8n
+async function loadIncidents() {
+
+    try {
+        const res = await fetch("https://intelligenceai.app.n8n.cloud/webhook/57992206-2277-4339-9d7c-2fdfd0be92b9");
+        const data = await res.json();
+
+        displayIncidents(data.incidents);
+
+    } catch (error) {
+        console.error("Erreur chargement incidents :", error);
+    }
+}
+
+
+// 🔥 affichage tableau (inchangé)
+function displayIncidents(data) {
+
+    const tbody = document.getElementById("incidentTableBody");
+    tbody.innerHTML = "";
+
+    data.forEach(i => {
+
+        let graviteClass = (i.gravite || "").toLowerCase().includes("critique") ? "critique" :
+                           (i.gravite || "").toLowerCase().includes("élev") ? "elevee" : "moyenne";
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>🚨 ${i.ligne}</td>
+            <td>${parseInt(i.retard)} min</td>
+            <td class="${graviteClass}">${i.gravite}</td>
+            <td>${i.cause}</td>
+            <td>🛠 ${i.solution}</td>
+            <td>📌 ${i.recommandation}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+
+// 🔥 lancement
+loadIncidents();
+
+// 🔥 auto refresh (optionnel)
+setInterval(loadIncidents, 5000);
+
+</script>
+
+</body>
+</html>

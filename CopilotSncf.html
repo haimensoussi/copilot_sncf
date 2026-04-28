@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Copilote SNCF IA</title>
+
+<link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+
+<style>
+.incident-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.incident-table th {
+    text-align: left;
+    padding: 10px;
+    background: rgba(255,255,255,0.1);
+}
+
+.incident-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.incident-table tr:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+/* couleurs gravité */
+.critique { color: red; font-weight: bold; }
+.elevee { color: orange; }
+.moyenne { color: yellow; }
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #020617, #0f172a);
+    color: white;
+}
+
+/* HEADER */
+header {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+header h1 {
+    font-size: 40px;
+    background: linear-gradient(90deg, #38bdf8, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* INTRO + HAKIM */
+.intro-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 20px;
+    align-items: center;
+}
+
+.intro {
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(15,23,42,0.6);
+}
+
+/* HAKIM */
+.hakim {
+    position: relative;
+    cursor: pointer;
+}
+
+.hakim img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    object-position: center top;
+}
+
+/* overlay Hakim */
+.hakim-overlay {
+    position: absolute;
+    bottom: 0;
+    padding: 20px;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    border-radius: 0 0 20px 20px;
+}
+
+.hakim-overlay h2 {
+    margin: 0;
+}
+
+.hakim-overlay p {
+    margin: 5px 0;
+    opacity: 0.8;
+}
+
+/* GRID AGENTS */
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    padding: 20px;
+}
+
+/* CARD */
+.card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-8px) scale(1.03);
+}
+
+.card-img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+}
+
+.card-content {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+}
+
+/* CHAT */
+#chat-container {
+    margin: 25px;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+    .intro-container {
+        grid-template-columns: 1fr;
+    }
+}
+.auto-card {
+    background: rgba(30,41,59,0.8);
+    padding: 20px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.auto-card:hover {
+    transform: translateY(-5px);
+    background: rgba(51,65,85,0.9);
+}
+
+.auto-card h3 {
+    margin: 0;
+}
+
+.auto-card p {
+    opacity: 0.7;
+    margin-top: 5px;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+    <h1>Copilot IA SNCF Réseau</h1>
+    <p>Plateforme intelligente multi-agents permettant de superviser, analyser et optimiser le réseau ferroviaire en temps réel, avec automatisation des processus et orchestration d’agents experts métiers pour une prise de décision rapide et fiable..</p>
+</header>
+
+<!-- INTRO + HAKIM -->
+<div class="intro-container">
+
+    <div class="intro">
+        <h2>Copilot intelligent SNCF Réseau</h2>
+        <p>Interagissez avec le copilote IA en posant une question ou en sollicitant directement un agent métier (@fanny, @sofia…) pour obtenir une analyse et des recommandations en temps réel.</p>
+    </div>
+
+    <!-- HAKIM -->
+    <div class="hakim" onclick="sendQuick('analyse globale du réseau SNCF')">
+        <img src="C:\Users\PHSI10251\OneDrive - SNCF\Bureau\Copilot SNCF/hakim.png">
+        <div class="hakim-overlay">
+            <h2>Hakim</h2>
+            <p>Orchestrateur IA</p>
+            <p>🔍 Cliquer pour analyse globale</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- AGENTS -->
+<div class="container">
+
+    <div class="card" onclick="sendQuick('@fanny pourquoi il y a des retards ?')">
+        <img src="C:\Users\PHSI10251\OneDrive - SNCF\Bureau\Copilot SNCF/fanny.png" class="card-img">
+        <div class="card-content">
+            <h2>Fanny</h2>
+            <p>Exploitation</p>
+        </div>
+    </div>
+
+    <div class="card" onclick="sendQuick('@lucas quelles gares sont saturées ?')">
+        <img src="C:\Users\PHSI10251\OneDrive - SNCF\Bureau\Copilot SNCF/lucas.png" class="card-img">
+        <div class="card-content">
+            <h2>Lucas</h2>
+            <p>Trafic voyageurs</p>
+        </div>
+    </div>
+
+    <div class="card" onclick="sendQuick('@claire quels métiers recrutent ?')">
+        <img src="C:\Users\PHSI10251\OneDrive - SNCF\Bureau\Copilot SNCF/claire1.png" class="card-img">
+        <div class="card-content">
+            <h2>Claire</h2>
+            <p>RH</p>
+        </div>
+    </div>
+
+    <div class="card" onclick="sendQuick('@sofia quels trains sont à risque ?')">
+        <img src="C:\Users\PHSI10251\OneDrive - SNCF\Bureau\Copilot SNCF/sofia.png" class="card-img">
+        <div class="card-content">
+            <h2>Sofia</h2>
+            <p>Prédiction IA</p>
+        </div>
+    </div>
+
+</div>
+<div class="panel">
+    <h2>Incidents et prédictions détectés automatiquement par un copilote IA spécialisé, à partir des données du réseau en temps réel.</h2>
+    <div id="incidentList"></div>
+</div>
+<div id="chat-container"></div>
+
+</div>
+
+<script type="module">
+
+import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+const chat = createChat({
+    webhookUrl: 'https://intelligenceai.app.n8n.cloud/webhook/77d3ff55-1dc6-470c-96dd-153370df3a47/chat',
+    target: '#chat-container',
+    mode: 'embedded'
+});
+
+window.n8nChat = chat;
+
+window.sendQuick = (msg) => {
+    window.n8nChat.sendMessage(msg);
+};
+
+</script>
+<body>
+
+<!-- ton HTML -->
+<div class="panel">
+    <h2>🚨 Incidents</h2>
+
+    <table class="incident-table">
+        <thead>
+            <tr>
+                <th>Ligne</th>
+                <th>Retard</th>
+                <th>Gravité</th>
+                <th>Cause</th>
+                <th>Solution</th>
+                <th>Recommandation</th>
+            </tr>
+        </thead>
+        <tbody id="incidentTableBody"></tbody>
+    </table>
+</div>
+<script>
+
+// 🔥 charger depuis n8n
+async function loadIncidents() {
+
+    try {
+        const res = await fetch("https://intelligenceai.app.n8n.cloud/webhook/57992206-2277-4339-9d7c-2fdfd0be92b9");
+        const data = await res.json();
+
+        displayIncidents(data.incidents);
+
+    } catch (error) {
+        console.error("Erreur chargement incidents :", error);
+    }
+}
+
+
+// 🔥 affichage tableau (inchangé)
+function displayIncidents(data) {
+
+    const tbody = document.getElementById("incidentTableBody");
+    tbody.innerHTML = "";
+
+    data.forEach(i => {
+
+        let graviteClass = (i.gravite || "").toLowerCase().includes("critique") ? "critique" :
+                           (i.gravite || "").toLowerCase().includes("élev") ? "elevee" : "moyenne";
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${i.ligne}</td>
+            <td>${parseInt(i.retard)} min</td>
+            <td class="${graviteClass}">${i.gravite}</td>
+            <td>${i.cause}</td>
+            <td>${i.solution}</td>
+            <td>${i.recommandation}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+
+// 🔥 lancement
+loadIncidents();
+
+// 🔥 auto refresh (optionnel)
+setInterval(loadIncidents, 5000);
+
+</script>
+<!-- 🔥 JS ICI -->
+<div class="panel">
+    <h2>🔮 Prédictions maintenance</h2>
+
+    <table class="incident-table">
+        <thead>
+            <tr>
+                <th>Ligne</th>
+                <th>Risque</th>
+                <th>Score</th>
+                <th>Cause</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="predictionTableBody"></tbody>
+    </table>
+</div>
+
+<script>
+
+async function loadPredictions() {
+
+    try {
+        const res = await fetch("https://intelligenceai.app.n8n.cloud/webhook/ffe76c85-6f92-4d60-bfd1-107c7eb991a4");
+        const data = await res.json();
+
+        console.log("DATA =", data); // debug
+
+        const tbody = document.getElementById("predictionTableBody");
+        tbody.innerHTML = "";
+
+        const list = data.predictions || data || [];
+
+        list.forEach(p => {
+
+            let cls =
+                (p.risque || "").toLowerCase().includes("critique") ? "critique" :
+                (p.risque || "").toLowerCase().includes("élev") ? "elevee" : "moyenne";
+
+            const tr = document.createElement("tr");
+
+tr.innerHTML = `
+    <td>${p.ligne || "-"}</td>
+    <td class="${cls}">${p.risque || "-"}</td>
+    <td>${p.score_risque || 0}</td>
+    <td>${p.cause_principale || "-"}</td>
+    <td>${p.action_immediate || "-"}</td>
+    <td>
+        <button onclick="sendEmailAlert('${p.ligne}', '${p.cause_principale}', '${p.score_risque}')">
+            📧 Alerter
+        </button>
+    </td>
+`;
+            tbody.appendChild(tr);
+        });
+
+    } catch (e) {
+        console.error("Erreur prédictions :", e);
+    }
+}
+
+// ✅ AJOUT IMPORTANT
+loadPredictions();
+setInterval(loadPredictions, 5000);
+
+</script>
+</body>
+</html>

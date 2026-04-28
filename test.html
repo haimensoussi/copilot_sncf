@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Assistant Vocal SNCF</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #1e293b, #0f172a);
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+      padding: 50px;
+      border-radius: 25px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      width: 420px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+
+    p {
+      opacity: 0.7;
+      margin-bottom: 30px;
+    }
+
+    elevenlabs-convai {
+      display: block;
+      margin: auto;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.5;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h1>🚆 Assistant SNCF</h1>
+  <p>Parle avec Aria</p>
+
+  <elevenlabs-convai 
+    agent-id="agent_1701kq7cf7cke4dv93fth4h96s6w"
+  ></elevenlabs-convai>
+
+  <div class="footer">
+    🎤 Voix • 💬 Chat • Temps réel
+  </div>
+</div>
+
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
+
+</body>
+</html>
