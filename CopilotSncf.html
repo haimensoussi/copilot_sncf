@@ -262,6 +262,16 @@ window.sendQuick = (msg) => {
 <body>
 
 <!-- ton HTML -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>SNCF Dashboard</title>
+</head>
+
+<body>
+
+<!-- 🚨 INCIDENTS -->
 <div class="panel">
     <h2>🚨 Incidents</h2>
 
@@ -279,9 +289,56 @@ window.sendQuick = (msg) => {
         <tbody id="incidentTableBody"></tbody>
     </table>
 </div>
+
+<!-- 🔮 PRÉDICTIONS -->
+<div class="panel">
+    <h2>🔮 Prédictions maintenance</h2>
+
+    <table class="incident-table">
+        <thead>
+            <tr>
+                <th>Ligne</th>
+                <th>Risque</th>
+                <th>Score</th>
+                <th>Cause</th>
+                <th>Action</th>
+                <th>Alerte</th>
+            </tr>
+        </thead>
+        <tbody id="predictionTableBody"></tbody>
+    </table>
+</div>
+
 <script>
 
-// 🔥 charger depuis n8n
+// 🔥 afficher incidents
+function displayIncidents(data) {
+
+    const tbody = document.getElementById("incidentTableBody");
+    tbody.innerHTML = "";
+
+    data.forEach(i => {
+
+        let graviteClass =
+            (i.gravite || "").toLowerCase().includes("critique") ? "critique" :
+            (i.gravite || "").toLowerCase().includes("élev") ? "elevee" : "moyenne";
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${i.ligne}</td>
+            <td>${parseInt(i.retard)} min</td>
+            <td class="${graviteClass}">${i.gravite}</td>
+            <td>${i.cause}</td>
+            <td>${i.solution}</td>
+            <td>${i.recommandation}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+// 🔥 charger incidents (local test)
 function loadIncidents() {
 
     const data = [
@@ -304,33 +361,14 @@ function loadIncidents() {
     ];
 
     displayIncidents(data);
-}<!-- 🔥 JS ICI -->
-<div class="panel">
-    <h2>🔮 Prédictions maintenance</h2>
+}
 
-    <table class="incident-table">
-        <thead>
-            <tr>
-                <th>Ligne</th>
-                <th>Risque</th>
-                <th>Score</th>
-                <th>Cause</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="predictionTableBody"></tbody>
-    </table>
-</div>
-
-<script>
-
+// 🔮 charger prédictions depuis n8n
 async function loadPredictions() {
 
     try {
         const res = await fetch("https://intelligenceai.app.n8n.cloud/webhook/ffe76c85-6f92-4d60-bfd1-107c7eb991a4");
         const data = await res.json();
-
-        console.log("DATA =", data); // debug
 
         const tbody = document.getElementById("predictionTableBody");
         tbody.innerHTML = "";
@@ -345,18 +383,19 @@ async function loadPredictions() {
 
             const tr = document.createElement("tr");
 
-tr.innerHTML = `
-    <td>${p.ligne || "-"}</td>
-    <td class="${cls}">${p.risque || "-"}</td>
-    <td>${p.score_risque || 0}</td>
-    <td>${p.cause_principale || "-"}</td>
-    <td>${p.action_immediate || "-"}</td>
-    <td>
-        <button onclick="sendEmailAlert('${p.ligne}', '${p.cause_principale}', '${p.score_risque}')">
-            📧 Alerter
-        </button>
-    </td>
-`;
+            tr.innerHTML = `
+                <td>${p.ligne || "-"}</td>
+                <td class="${cls}">${p.risque || "-"}</td>
+                <td>${p.score_risque || 0}</td>
+                <td>${p.cause_principale || "-"}</td>
+                <td>${p.action_immediate || "-"}</td>
+                <td>
+                    <button onclick="sendEmailAlert('${p.ligne}', '${p.cause_principale}', '${p.score_risque}')">
+                        Alerter
+                    </button>
+                </td>
+            `;
+
             tbody.appendChild(tr);
         });
 
@@ -365,11 +404,21 @@ tr.innerHTML = `
     }
 }
 
-// ✅ AJOUT IMPORTANT
+// 🔥 fonction email (placeholder)
+function sendEmailAlert(ligne, cause, score) {
+    alert(`Email envoyé pour ${ligne} | Cause: ${cause} | Score: ${score}`);
+}
+
+// 🔄 lancement
+loadIncidents();
 loadPredictions();
 setInterval(loadPredictions, 5000);
 
 </script>
-    <elevenlabs-convai agent-id="agent_1701kq7cf7cke4dv93fth4h96s6w"></elevenlabs-convai><script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+
+<!-- 🎤 Voice -->
+<elevenlabs-convai agent-id="agent_1701kq7cf7cke4dv93fth4h96s6w"></elevenlabs-convai>
+<script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async></script>
+
 </body>
 </html>
