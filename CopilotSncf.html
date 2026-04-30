@@ -282,55 +282,29 @@ window.sendQuick = (msg) => {
 <script>
 
 // 🔥 charger depuis n8n
-async function loadIncidents() {
+function loadIncidents() {
 
-    try {
-        const res = await fetch("https://intelligenceai.app.n8n.cloud/webhook/57992206-2277-4339-9d7c-2fdfd0be92b9");
-        const data = await res.json();
+    const data = [
+        {
+            ligne: "Ligne A",
+            retard: 45,
+            gravite: "Critique",
+            cause: "Panne caténaire",
+            solution: "Intervention maintenance",
+            recommandation: "Déployer équipe en urgence"
+        },
+        {
+            ligne: "Ligne B",
+            retard: 20,
+            gravite: "Élevée",
+            cause: "Problème signalisation",
+            solution: "Redémarrage système",
+            recommandation: "Surveillance renforcée"
+        }
+    ];
 
-        displayIncidents(data.incidents);
-
-    } catch (error) {
-        console.error("Erreur chargement incidents :", error);
-    }
-}
-
-
-// 🔥 affichage tableau (inchangé)
-function displayIncidents(data) {
-
-    const tbody = document.getElementById("incidentTableBody");
-    tbody.innerHTML = "";
-
-    data.forEach(i => {
-
-        let graviteClass = (i.gravite || "").toLowerCase().includes("critique") ? "critique" :
-                           (i.gravite || "").toLowerCase().includes("élev") ? "elevee" : "moyenne";
-
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-            <td>${i.ligne}</td>
-            <td>${parseInt(i.retard)} min</td>
-            <td class="${graviteClass}">${i.gravite}</td>
-            <td>${i.cause}</td>
-            <td>${i.solution}</td>
-            <td>${i.recommandation}</td>
-        `;
-
-        tbody.appendChild(tr);
-    });
-}
-
-
-// 🔥 lancement
-loadIncidents();
-
-// 🔥 auto refresh (optionnel)
-setInterval(loadIncidents, 5000);
-
-</script>
-<!-- 🔥 JS ICI -->
+    displayIncidents(data);
+}<!-- 🔥 JS ICI -->
 <div class="panel">
     <h2>🔮 Prédictions maintenance</h2>
 
