@@ -418,6 +418,171 @@ setInterval(loadPredictions, 5000);
 
 <!-- 🎤 Voice -->
 <elevenlabs-convai agent-id="agent_4401kqf7v0k4ed6a4xecym9jbhm2"></elevenlabs-convai><script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Carte IA SNCF</title>
 
+<style>
+  body {
+    margin: 0;
+    background: #0f172a;
+    font-family: Arial;
+  }
+
+  #map {
+    height: 100vh;
+    width: 100%;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script>
+let map;
+let heatmap;
+let markers = [];
+
+function initMap() {
+
+  console.log("✅ Map chargée");
+
+  map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 8,
+    center: { lat: 47, lng: 2 }
+  });
+
+  loadGares();
+}
+
+async function loadGares() {
+
+  try {
+
+    console.log("📡 Chargement données...");
+
+    const res = await fetch("https://n8n-rv8r.srv1626904.hstgr.cloud/webhook/gares"); // 🔥 ton webhook n8n
+    const data = await res.json();
+
+    console.log("📊 DATA =", data);
+
+    const gares = data.gares || [];
+
+    console.log("NB GARES =", gares.length);
+
+    // 🧹 nettoyage anciens markers
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+
+    const heatData = [];
+
+    gares.forEach(g => {
+
+      // 🔥 skip si coordonnées invalides
+      if (g.lat == null || g.lng == null) {
+        console.log("❌ ignorée (null)", g.nom);
+        return;
+      }
+
+      const lat = parseFloat(g.lat);
+      const lng = parseFloat(g.lng);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        console.log("❌ ignorée (NaN)", g.nom);
+        return;
+      }
+
+      console.log("✅ affichée", g.nom);
+
+      // 🎨 couleur dynamique
+      const niveau = (g.niveau || "").toLowerCase();
+
+      let color =
+        niveau === "critique" ? "red" :
+        niveau === "surveillance" ? "orange" :
+        "green";
+
+      // 📍 MARKER
+      const marker = new google.maps.Marker({
+        position: { lat, lng },
+        map: map,
+        title: g.nom,
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: color,
+          fillOpacity: 1,
+          strokeWeight: 0
+        }
+      });
+
+      // 💬 POPUP
+      const info = new google.maps.InfoWindow({
+        content: `
+          <div style="color:black">
+            <strong>${g.nom}</strong><br>
+            👥 ${Number(g.frequentation || 0).toLocaleString()}<br>
+            📈 ${g.tendance || "-"}<br>
+            ⚠️ <b style="color:${color}">${niveau}</b><br><br>
+            ${g.action || ""}
+          </div>
+        `
+      });
+
+      marker.addListener("click", () => info.open(map, marker));
+
+      markers.push(marker);
+
+      // 🔥 HEATMAP
+      heatData.push({
+        location: new google.maps.LatLng(lat, lng),
+        weight: Number(g.frequentation) || 1
+      });
+
+    });
+
+    // 🔥 HEATMAP LAYER
+    if (heatmap) heatmap.setMap(null);
+
+    heatmap = new google.maps.visualization.HeatmapLayer({
+      data: heatData,
+      radius: 40
+    });
+
+    heatmap.setMap(map);
+
+    heatmap.set('gradient', [
+      'rgba(0,255,0,0)',
+      'rgba(0,255,0,1)',
+      'rgba(255,255,0,1)',
+      'rgba(255,165,0,1)',
+      'rgba(255,0,0,1)'
+    ]);
+
+  } catch (error) {
+    console.error("❌ erreur :", error);
+  }
+}
+
+// 🔁 refresh automatique
+setInterval(loadGares, 10000);
+const bounds = new google.maps.LatLngBounds();
+markers.forEach(m => bounds.extend(m.getPosition()));
+map.fitBounds(bounds);
+const garesCritiques = gares.filter(g => g.niveau === "critique");
+scale: g.frequentation / 5000
+</script>
+
+<!-- 🔥 GOOGLE MAPS -->
+<script async
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9H8cS4fdzCXsI1R_V3QjdaZA7_ETn6Ag&libraries=visualization&callback=initMap">
+</script>
+
+</body>
+</html>
 </body>
 </html>
